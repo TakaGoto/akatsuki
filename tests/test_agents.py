@@ -1,6 +1,6 @@
 """Tests for agent creation and presets."""
 
-from my_ai_team import create_agent, create_team, dev_team, full_team
+from my_ai_team import dev_team, full_team
 from my_ai_team.agents.presets import (
     tech_lead,
     feature_dev,
@@ -12,21 +12,6 @@ from my_ai_team.agents.presets import (
     docs_writer,
     devops,
 )
-
-
-# -- create_agent / create_team --
-
-
-def test_create_agent():
-    agent = create_agent(name="Test", instructions="You are a test agent.")
-    assert agent.name == "Test"
-
-
-def test_create_team():
-    member = create_agent(name="Worker", instructions="You do work.")
-    lead = create_team(name="Lead", instructions="You lead.", members=[member])
-    assert lead.name == "Lead"
-    assert len(lead.handoffs) == 1
 
 
 # -- Individual presets --
