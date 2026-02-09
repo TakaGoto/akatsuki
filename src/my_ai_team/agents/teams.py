@@ -5,6 +5,7 @@ from __future__ import annotations
 from agents import Agent
 
 from my_ai_team.agents.base import create_team
+from my_ai_team.agents.pipeline import Pipeline, Stage
 from my_ai_team.agents import presets
 
 
@@ -16,7 +17,7 @@ def dev_team(
     hidan_tools: list | None = None,
 ) -> Agent:
     """The core 4-agent Akatsuki squad: Kisame, Sasori, Itachi, Hidan
-    — coordinated by Pain.
+    — coordinated by Pain. Sequential handoff mode.
 
     Workflow:
     1. Kisame (Feature Dev) implements the changes
@@ -56,6 +57,7 @@ def full_team(
     extra_instructions: str = "",
 ) -> Agent:
     """The full Akatsuki — all 8 specialists coordinated by Pain.
+    Sequential handoff mode.
 
     Includes: Kisame (Feature Dev), Tobi (Mobile Dev), Sasori (Test),
     Itachi (Review), Hidan (Security), Deidara (Debug),
@@ -87,5 +89,74 @@ def full_team(
             presets.deidara(),
             presets.konan(),
             presets.kakuzu(),
+        ],
+    )
+
+
+# ── Parallel pipelines ──────────────────────────────────────────────
+
+
+def dev_pipeline(
+    extra_instructions: str = "",
+    kisame_tools: list | None = None,
+    sasori_tools: list | None = None,
+    itachi_tools: list | None = None,
+    hidan_tools: list | None = None,
+) -> Pipeline:
+    """Parallel dev pipeline: Kisame first, then Sasori + Itachi + Hidan
+    all run at the same time.
+
+    Stage 1: Kisame implements
+    Stage 2: Sasori (test) + Itachi (review) + Hidan (security) in parallel
+    """
+    return Pipeline(
+        context=extra_instructions,
+        stages=[
+            Stage(
+                label="Implementation",
+                agents=[presets.kisame(tools=kisame_tools)],
+            ),
+            Stage(
+                label="Review",
+                agents=[
+                    presets.sasori(tools=sasori_tools),
+                    presets.itachi(tools=itachi_tools),
+                    presets.hidan(tools=hidan_tools),
+                ],
+            ),
+        ],
+    )
+
+
+def full_pipeline(
+    extra_instructions: str = "",
+) -> Pipeline:
+    """Parallel full pipeline: Kisame first, then all reviewers in parallel,
+    then Konan for docs.
+
+    Stage 1: Kisame implements
+    Stage 2: Sasori + Itachi + Hidan + Deidara in parallel
+    Stage 3: Konan writes docs
+    """
+    return Pipeline(
+        context=extra_instructions,
+        stages=[
+            Stage(
+                label="Implementation",
+                agents=[presets.kisame()],
+            ),
+            Stage(
+                label="Review",
+                agents=[
+                    presets.sasori(),
+                    presets.itachi(),
+                    presets.hidan(),
+                    presets.deidara(),
+                ],
+            ),
+            Stage(
+                label="Documentation",
+                agents=[presets.konan()],
+            ),
         ],
     )

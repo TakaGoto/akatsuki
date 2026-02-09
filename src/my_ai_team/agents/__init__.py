@@ -10,7 +10,8 @@ from my_ai_team.agents.presets import (
     konan,
     kakuzu,
 )
-from my_ai_team.agents.teams import dev_team, full_team
+from my_ai_team.agents.teams import dev_team, full_team, dev_pipeline, full_pipeline
+from my_ai_team.agents.pipeline import Pipeline, Stage, run_pipeline
 
 __all__ = [
     "create_agent",
@@ -26,4 +27,9 @@ __all__ = [
     "kakuzu",
     "dev_team",
     "full_team",
+    "dev_pipeline",
+    "full_pipeline",
+    "Pipeline",
+    "Stage",
+    "run_pipeline",
 ]
