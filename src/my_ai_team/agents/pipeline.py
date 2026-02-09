@@ -17,7 +17,10 @@ from dataclasses import dataclass, field
 
 from agents import Agent, Runner
 
-from my_ai_team.agents.base import ANTHROPIC_PROVIDER, HOOKS, MAX_TURNS, TokenUsage
+from my_ai_team.agents.base import (
+    ANTHROPIC_PROVIDER, HOOKS, MAX_TURNS, TokenUsage,
+    _BOLD, _DIM, _GREEN, _YELLOW, _RESET, _agent_color, _log,
+)
 
 
 @dataclass
@@ -111,19 +114,21 @@ async def run_pipeline(pipeline: Pipeline, task: str) -> tuple[str, TokenUsage]:
             all_outputs.append((name, output))
             usage.add(name, in_tok, out_tok, reqs)
             label = stage.label or name
+            c = _agent_color(name)
             if stage.fix:
-                print(f"[{label}] fixing issues...")
-            print(f"[{label}] done")
+                _log(f"{_YELLOW}[{label}]{_RESET} Fixing issues...")
+            _log(f"{_BOLD}{c}[{label}]{_RESET} {_GREEN}Done{_RESET}")
         else:
             label = stage.label or ", ".join(a.name for a in stage.agents)
-            print(f"[{label}] running {len(stage.agents)} agents in parallel...")
+            _log(f"{_BOLD}[{label}]{_RESET} Running {len(stage.agents)} agents in parallel...")
             results = await asyncio.gather(
                 *[_run_agent(agent, message) for agent in stage.agents]
             )
             for name, output, in_tok, out_tok, reqs in results:
                 all_outputs.append((name, output))
                 usage.add(name, in_tok, out_tok, reqs)
-                print(f"  [{name}] done")
+                c = _agent_color(name)
+                _log(f"  {_BOLD}{c}[{name}]{_RESET} {_GREEN}Done{_RESET}")
 
     # Combine all outputs into a final summary
     sections = []

@@ -1,13 +1,13 @@
 """CLI for running the Akatsuki agent team from any directory.
 
 Usage:
-    akatsuki "implement the signup form"
-    akatsuki --parallel "implement the signup form"
-    akatsuki --agent kisame "add input validation"
-    akatsuki --agents kisame,itachi,hidan "add auth with review"
-    akatsuki --team full "add price alerts with tests and docs"
-    akatsuki --list
-    akatsuki --config
+    pain "implement the signup form"
+    pain --parallel "implement the signup form"
+    pain --agent kisame "add input validation"
+    pain --agents kisame,itachi,hidan "add auth with review"
+    pain --team full "add price alerts with tests and docs"
+    pain --list
+    pain --config
 """
 
 from __future__ import annotations
@@ -67,8 +67,16 @@ Modes
 ═══════════════════════════════════════
   (default) Sequential — Pain hands off one at a time
   --parallel Pipeline  — stages run in parallel where possible
-    dev:  Kisame → [Sasori + Itachi + Hidan]
-    full: Kisame → [Sasori + Itachi + Hidan + Deidara] → Konan
+    dev:  Kisame → [Sasori + Itachi + Hidan] → Kisame (fix)
+    full: Kisame → [Sasori + Itachi + Hidan + Deidara] → Kisame (fix) → Konan
+
+Usage
+═══════════════════════════════════════
+  pain "implement the signup form"
+  pain --parallel "implement the signup form"
+  pain --agent kisame "add input validation"
+  pain --agents kisame,itachi,hidan "add auth with review"
+  pain --team full "add price alerts with tests and docs"
 """.strip()
 
 
@@ -148,7 +156,7 @@ def build_custom_pipeline(names: list[str], config: dict, cli_context: str = "")
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="akatsuki",
+        prog="pain",
         description="Run the Akatsuki AI agent team from the terminal.",
     )
     parser.add_argument(

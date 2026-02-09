@@ -21,8 +21,37 @@ ANTHROPIC_PROVIDER = RunConfig(model_provider=LitellmProvider())
 MAX_TURNS = 50
 
 
+# ANSI colors
+_BOLD = "\033[1m"
+_DIM = "\033[2m"
+_RED = "\033[31m"
+_GREEN = "\033[32m"
+_YELLOW = "\033[33m"
+_BLUE = "\033[34m"
+_MAGENTA = "\033[35m"
+_CYAN = "\033[36m"
+_RESET = "\033[0m"
+
+# Agent name -> color
+_AGENT_COLORS = {
+    "Pain": _MAGENTA,
+    "Kisame": _BLUE,
+    "Tobi": _CYAN,
+    "Sasori": _GREEN,
+    "Itachi": _RED,
+    "Hidan": _YELLOW,
+    "Deidara": _YELLOW,
+    "Konan": _CYAN,
+    "Kakuzu": _GREEN,
+}
+
+
+def _agent_color(name: str) -> str:
+    return _AGENT_COLORS.get(name, _BLUE)
+
+
 class ProgressHooks(RunHooks):
-    """Prints human-readable progress to stderr."""
+    """Prints human-readable progress with color to stderr."""
 
     def __init__(self):
         self._phase: dict[str, str] = {}
@@ -31,10 +60,12 @@ class ProgressHooks(RunHooks):
         prev = self._phase.get(agent_name)
         if prev != phase:
             self._phase[agent_name] = phase
-            _log(f"  [{agent_name}] {phase}")
+            c = _agent_color(agent_name)
+            _log(f"  {_DIM}{c}{phase}{_RESET}")
 
     async def on_agent_start(self, context, agent):
-        _log(f"[{agent.name}] starting...")
+        c = _agent_color(agent.name)
+        _log(f"{_BOLD}{c}[{agent.name}]{_RESET} starting...")
 
     async def on_tool_start(self, context, agent, tool):
         name = tool.name
@@ -46,11 +77,14 @@ class ProgressHooks(RunHooks):
             self._set_phase(agent.name, "Running commands...")
 
     async def on_handoff(self, context, from_agent, to_agent):
-        _log(f"[{from_agent.name}] Handing off to {to_agent.name}")
+        fc = _agent_color(from_agent.name)
+        tc = _agent_color(to_agent.name)
+        _log(f"{fc}[{from_agent.name}]{_RESET} {_DIM}->{_RESET} {_BOLD}{tc}[{to_agent.name}]{_RESET}")
 
     async def on_agent_end(self, context, agent, output):
         self._phase.pop(agent.name, None)
-        _log(f"[{agent.name}] Done")
+        c = _agent_color(agent.name)
+        _log(f"{_BOLD}{c}[{agent.name}]{_RESET} {_GREEN}Done{_RESET}")
 
 
 def _log(msg: str) -> None:
@@ -90,21 +124,22 @@ class TokenUsage:
     def summary(self) -> str:
         lines = [
             "",
-            "Token Usage",
-            "═══════════════════════════════════════",
+            f"{_BOLD}Token Usage{_RESET}",
+            f"{_DIM}═══════════════════════════════════════{_RESET}",
         ]
         for name, counts in self.by_agent.items():
             total = counts["input_tokens"] + counts["output_tokens"]
+            c = _agent_color(name)
             lines.append(
-                f"  {name:<16} {total:>8,} tokens "
-                f"({counts['input_tokens']:,} in / {counts['output_tokens']:,} out) "
-                f"[{counts['requests']} req]"
+                f"  {c}{name:<16}{_RESET} {total:>8,} tokens "
+                f"{_DIM}({counts['input_tokens']:,} in / {counts['output_tokens']:,} out) "
+                f"[{counts['requests']} req]{_RESET}"
             )
-        lines.append("───────────────────────────────────────")
+        lines.append(f"{_DIM}───────────────────────────────────────{_RESET}")
         lines.append(
-            f"  {'Total':<16} {self.total_tokens:>8,} tokens "
-            f"({self.input_tokens:,} in / {self.output_tokens:,} out) "
-            f"[{self.requests} req]"
+            f"  {_BOLD}{'Total':<16}{_RESET} {self.total_tokens:>8,} tokens "
+            f"{_DIM}({self.input_tokens:,} in / {self.output_tokens:,} out) "
+            f"[{self.requests} req]{_RESET}"
         )
         return "\n".join(lines)
 
