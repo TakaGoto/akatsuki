@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 
 from agents import Agent, Runner
 
-from my_ai_team.agents.base import ANTHROPIC_PROVIDER, MAX_TURNS, TokenUsage
+from my_ai_team.agents.base import ANTHROPIC_PROVIDER, HOOKS, MAX_TURNS, TokenUsage
 
 
 @dataclass
@@ -42,7 +42,9 @@ class Pipeline:
 
 async def _run_agent(agent: Agent, message: str) -> tuple[str, str, int, int, int]:
     """Run a single agent and return (name, output, input_tokens, output_tokens, requests)."""
-    result = await Runner.run(agent, message, run_config=ANTHROPIC_PROVIDER, max_turns=MAX_TURNS)
+    result = await Runner.run(
+        agent, message, run_config=ANTHROPIC_PROVIDER, max_turns=MAX_TURNS, hooks=HOOKS,
+    )
     sdk_usage = result.context_wrapper.usage
     return (
         agent.name,

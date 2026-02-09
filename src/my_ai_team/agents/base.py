@@ -5,9 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+import sys
+
 import litellm
 from agents import Agent, Runner, RunConfig
 from agents.extensions.models.litellm_provider import LitellmProvider
+from agents.lifecycle import RunHooks
 from agents.tracing import set_tracing_disabled
 
 # Route all LLM calls through Anthropic via LiteLLM
@@ -16,6 +19,34 @@ set_tracing_disabled(True)
 
 ANTHROPIC_PROVIDER = RunConfig(model_provider=LitellmProvider())
 MAX_TURNS = 50
+
+
+class ProgressHooks(RunHooks):
+    """Prints live progress to stderr so users see what agents are doing."""
+
+    async def on_agent_start(self, context, agent):
+        _log(f"[{agent.name}] starting...")
+
+    async def on_tool_start(self, context, agent, tool):
+        _log(f"  [{agent.name}] {tool.name}()")
+
+    async def on_tool_end(self, context, agent, tool, result):
+        preview = (result or "")[:80].replace("\n", " ").strip()
+        if preview:
+            _log(f"  [{agent.name}] {tool.name} -> {preview}")
+
+    async def on_handoff(self, context, from_agent, to_agent):
+        _log(f"[{from_agent.name}] -> [{to_agent.name}]")
+
+    async def on_agent_end(self, context, agent, output):
+        _log(f"[{agent.name}] done")
+
+
+def _log(msg: str) -> None:
+    print(msg, file=sys.stderr, flush=True)
+
+
+HOOKS = ProgressHooks()
 
 
 @dataclass
@@ -119,7 +150,9 @@ def create_team(
 
 async def run(agent: Agent, message: str) -> tuple[str, TokenUsage]:
     """Run an agent with a user message and return (output, usage)."""
-    result = await Runner.run(agent, message, run_config=ANTHROPIC_PROVIDER, max_turns=MAX_TURNS)
+    result = await Runner.run(
+        agent, message, run_config=ANTHROPIC_PROVIDER, max_turns=MAX_TURNS, hooks=HOOKS,
+    )
     usage = TokenUsage()
     sdk_usage = result.context_wrapper.usage
     usage.add(
