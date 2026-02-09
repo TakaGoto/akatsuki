@@ -2,9 +2,59 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from typing import Any
 
 from agents import Agent, Runner
+
+
+@dataclass
+class TokenUsage:
+    """Aggregated token usage across one or more agent runs."""
+    input_tokens: int = 0
+    output_tokens: int = 0
+    requests: int = 0
+    by_agent: dict[str, dict[str, int]] = field(default_factory=dict)
+
+    @property
+    def total_tokens(self) -> int:
+        return self.input_tokens + self.output_tokens
+
+    def add(self, agent_name: str, input_tokens: int, output_tokens: int, requests: int) -> None:
+        self.input_tokens += input_tokens
+        self.output_tokens += output_tokens
+        self.requests += requests
+        if agent_name in self.by_agent:
+            self.by_agent[agent_name]["input_tokens"] += input_tokens
+            self.by_agent[agent_name]["output_tokens"] += output_tokens
+            self.by_agent[agent_name]["requests"] += requests
+        else:
+            self.by_agent[agent_name] = {
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "requests": requests,
+            }
+
+    def summary(self) -> str:
+        lines = [
+            "",
+            "Token Usage",
+            "═══════════════════════════════════════",
+        ]
+        for name, counts in self.by_agent.items():
+            total = counts["input_tokens"] + counts["output_tokens"]
+            lines.append(
+                f"  {name:<16} {total:>8,} tokens "
+                f"({counts['input_tokens']:,} in / {counts['output_tokens']:,} out) "
+                f"[{counts['requests']} req]"
+            )
+        lines.append("───────────────────────────────────────")
+        lines.append(
+            f"  {'Total':<16} {self.total_tokens:>8,} tokens "
+            f"({self.input_tokens:,} in / {self.output_tokens:,} out) "
+            f"[{self.requests} req]"
+        )
+        return "\n".join(lines)
 
 
 def create_agent(
@@ -57,7 +107,15 @@ def create_team(
     )
 
 
-async def run(agent: Agent, message: str) -> str:
-    """Run an agent with a user message and return the final text output."""
+async def run(agent: Agent, message: str) -> tuple[str, TokenUsage]:
+    """Run an agent with a user message and return (output, usage)."""
     result = await Runner.run(agent, message)
-    return result.final_output
+    usage = TokenUsage()
+    sdk_usage = result.context_wrapper.usage
+    usage.add(
+        agent_name=agent.name,
+        input_tokens=sdk_usage.input_tokens,
+        output_tokens=sdk_usage.output_tokens,
+        requests=sdk_usage.requests,
+    )
+    return result.final_output, usage

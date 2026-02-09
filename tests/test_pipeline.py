@@ -1,5 +1,6 @@
-"""Tests for pipeline creation and structure."""
+"""Tests for pipeline creation, structure, and token usage."""
 
+from my_ai_team.agents.base import TokenUsage
 from my_ai_team.agents.pipeline import Pipeline, Stage, _build_message
 from my_ai_team.agents.teams import dev_pipeline, full_pipeline
 from my_ai_team.agents.presets import kisame, itachi, hidan
@@ -132,3 +133,51 @@ def test_build_message_fix():
     assert "EVERY issue" in msg
     assert "Itachi" in msg
     assert "Hidan" in msg
+
+
+# ── Token usage tests ──────────────────────────────────────────────
+
+
+def test_token_usage_add():
+    usage = TokenUsage()
+    usage.add("Kisame", input_tokens=1000, output_tokens=500, requests=2)
+    assert usage.input_tokens == 1000
+    assert usage.output_tokens == 500
+    assert usage.total_tokens == 1500
+    assert usage.requests == 2
+    assert "Kisame" in usage.by_agent
+
+
+def test_token_usage_add_multiple_agents():
+    usage = TokenUsage()
+    usage.add("Kisame", input_tokens=1000, output_tokens=500, requests=2)
+    usage.add("Itachi", input_tokens=800, output_tokens=300, requests=1)
+    assert usage.input_tokens == 1800
+    assert usage.output_tokens == 800
+    assert usage.total_tokens == 2600
+    assert usage.requests == 3
+    assert len(usage.by_agent) == 2
+
+
+def test_token_usage_add_same_agent_twice():
+    usage = TokenUsage()
+    usage.add("Kisame", input_tokens=1000, output_tokens=500, requests=2)
+    usage.add("Kisame", input_tokens=2000, output_tokens=800, requests=1)
+    assert usage.input_tokens == 3000
+    assert usage.output_tokens == 1300
+    assert usage.requests == 3
+    assert usage.by_agent["Kisame"]["input_tokens"] == 3000
+    assert usage.by_agent["Kisame"]["output_tokens"] == 1300
+    assert usage.by_agent["Kisame"]["requests"] == 3
+
+
+def test_token_usage_summary_format():
+    usage = TokenUsage()
+    usage.add("Kisame", input_tokens=1000, output_tokens=500, requests=2)
+    usage.add("Itachi", input_tokens=800, output_tokens=300, requests=1)
+    summary = usage.summary()
+    assert "Token Usage" in summary
+    assert "Kisame" in summary
+    assert "Itachi" in summary
+    assert "Total" in summary
+    assert "2,600" in summary

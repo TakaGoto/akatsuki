@@ -231,8 +231,9 @@ def main() -> None:
     # Single agent mode — no parallelism needed
     if args.agent:
         agent = build_agent_with_overrides(args.agent, config, args.context)
-        result = asyncio.run(run(agent, args.task))
+        result, usage = asyncio.run(run(agent, args.task))
         print(result)
+        print(usage.summary())
         return
 
     # Custom agents list
@@ -246,11 +247,12 @@ def main() -> None:
 
         if args.parallel:
             pipeline = build_custom_pipeline(names, config, args.context)
-            result = asyncio.run(run_pipeline(pipeline, args.task))
+            result, usage = asyncio.run(run_pipeline(pipeline, args.task))
         else:
             agent = build_custom_squad(names, config, args.context)
-            result = asyncio.run(run(agent, args.task))
+            result, usage = asyncio.run(run(agent, args.task))
         print(result)
+        print(usage.summary())
         return
 
     # Team mode
@@ -259,13 +261,14 @@ def main() -> None:
     if args.parallel:
         pipeline_factory = PIPELINES[team_name]
         pipeline = pipeline_factory(extra_instructions=context)
-        result = asyncio.run(run_pipeline(pipeline, args.task))
+        result, usage = asyncio.run(run_pipeline(pipeline, args.task))
     else:
         team_factory = TEAMS[team_name]
         agent = team_factory(extra_instructions=context)
-        result = asyncio.run(run(agent, args.task))
+        result, usage = asyncio.run(run(agent, args.task))
 
     print(result)
+    print(usage.summary())
 
 
 if __name__ == "__main__":

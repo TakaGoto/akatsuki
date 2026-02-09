@@ -17,6 +17,8 @@ from dataclasses import dataclass, field
 
 from agents import Agent, Runner
 
+from my_ai_team.agents.base import TokenUsage
+
 
 @dataclass
 class Stage:
@@ -38,10 +40,17 @@ class Pipeline:
     context: str = ""
 
 
-async def _run_agent(agent: Agent, message: str) -> tuple[str, str]:
-    """Run a single agent and return (agent_name, output)."""
+async def _run_agent(agent: Agent, message: str) -> tuple[str, str, int, int, int]:
+    """Run a single agent and return (name, output, input_tokens, output_tokens, requests)."""
     result = await Runner.run(agent, message)
-    return agent.name, result.final_output
+    sdk_usage = result.context_wrapper.usage
+    return (
+        agent.name,
+        result.final_output,
+        sdk_usage.input_tokens,
+        sdk_usage.output_tokens,
+        sdk_usage.requests,
+    )
 
 
 def _build_message(
@@ -79,12 +88,13 @@ def _build_message(
     return "\n\n".join(parts)
 
 
-async def run_pipeline(pipeline: Pipeline, task: str) -> str:
+async def run_pipeline(pipeline: Pipeline, task: str) -> tuple[str, TokenUsage]:
     """Execute a pipeline: stages run sequentially, agents within a stage run in parallel.
 
-    Returns a combined summary of all agent outputs.
+    Returns (combined_output, token_usage).
     """
     all_outputs: list[tuple[str, str]] = []
+    usage = TokenUsage()
 
     for stage in pipeline.stages:
         message = _build_message(
@@ -95,8 +105,9 @@ async def run_pipeline(pipeline: Pipeline, task: str) -> str:
         )
 
         if len(stage.agents) == 1:
-            name, output = await _run_agent(stage.agents[0], message)
+            name, output, in_tok, out_tok, reqs = await _run_agent(stage.agents[0], message)
             all_outputs.append((name, output))
+            usage.add(name, in_tok, out_tok, reqs)
             label = stage.label or name
             if stage.fix:
                 print(f"[{label}] fixing issues...")
@@ -107,8 +118,9 @@ async def run_pipeline(pipeline: Pipeline, task: str) -> str:
             results = await asyncio.gather(
                 *[_run_agent(agent, message) for agent in stage.agents]
             )
-            for name, output in results:
+            for name, output, in_tok, out_tok, reqs in results:
                 all_outputs.append((name, output))
+                usage.add(name, in_tok, out_tok, reqs)
                 print(f"  [{name}] done")
 
     # Combine all outputs into a final summary
@@ -116,4 +128,4 @@ async def run_pipeline(pipeline: Pipeline, task: str) -> str:
     for name, output in all_outputs:
         sections.append(f"## {name}\n\n{output}")
 
-    return "\n\n---\n\n".join(sections)
+    return "\n\n---\n\n".join(sections), usage
