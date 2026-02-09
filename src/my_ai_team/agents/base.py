@@ -5,7 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from agents import Agent, Runner
+from agents import Agent, Runner, RunConfig
+from agents.extensions.models.litellm_provider import LitellmProvider
+
+ANTHROPIC_PROVIDER = RunConfig(model_provider=LitellmProvider())
 
 
 @dataclass
@@ -62,7 +65,7 @@ def create_agent(
     instructions: str,
     tools: list[Any] | None = None,
     handoffs: list[Agent] | None = None,
-    model: str = "claude-sonnet-4-5-20250929",
+    model: str = "anthropic/claude-sonnet-4-5-20250929",
 ) -> Agent:
     """Create an agent with sensible defaults.
 
@@ -86,7 +89,7 @@ def create_team(
     name: str,
     instructions: str,
     members: list[Agent],
-    model: str = "claude-sonnet-4-5-20250929",
+    model: str = "anthropic/claude-sonnet-4-5-20250929",
 ) -> Agent:
     """Create a lead agent that orchestrates a team via handoffs.
 
@@ -109,7 +112,7 @@ def create_team(
 
 async def run(agent: Agent, message: str) -> tuple[str, TokenUsage]:
     """Run an agent with a user message and return (output, usage)."""
-    result = await Runner.run(agent, message)
+    result = await Runner.run(agent, message, run_config=ANTHROPIC_PROVIDER)
     usage = TokenUsage()
     sdk_usage = result.context_wrapper.usage
     usage.add(

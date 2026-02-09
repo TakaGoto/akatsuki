@@ -55,7 +55,7 @@ def test_hidan():
 
 def test_hidan_uses_opus_by_default():
     agent = hidan()
-    assert agent.model == "claude-opus-4-6"
+    assert agent.model == "anthropic/claude-opus-4-6"
 
 
 def test_deidara():

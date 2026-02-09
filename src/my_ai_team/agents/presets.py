@@ -200,7 +200,7 @@ def itachi(
 def hidan(
     tools: list[Any] | None = None,
     extra_instructions: str = "",
-    model: str = "claude-opus-4-6",
+    model: str = "anthropic/claude-opus-4-6",
 ) -> "Agent":
     """Hidan — the ritualist who methodically checks every vulnerability.
 
