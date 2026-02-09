@@ -96,7 +96,6 @@ team = create_team(
 
 See [`examples/`](examples/):
 
-- `simple_agent.py` — single agent
 - `dev_team.py` — standard 4-agent dev workflow
 - `full_team.py` — all 8 agents
 - `customize_agents.py` — project-specific tools and instructions
