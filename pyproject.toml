@@ -23,6 +23,9 @@ dependencies = [
     "anthropic-agents>=0.1.0",
 ]
 
+[project.scripts]
+myteam = "my_ai_team.cli:main"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
