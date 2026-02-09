@@ -5,8 +5,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+import litellm
 from agents import Agent, Runner, RunConfig
 from agents.extensions.models.litellm_provider import LitellmProvider
+from agents.tracing import set_tracing_disabled
+
+# Route all LLM calls through Anthropic via LiteLLM
+litellm.modify_params = True
+set_tracing_disabled(True)
 
 ANTHROPIC_PROVIDER = RunConfig(model_provider=LitellmProvider())
 
