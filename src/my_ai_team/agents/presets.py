@@ -22,6 +22,7 @@ from __future__ import annotations
 from typing import Any
 
 from my_ai_team.agents.base import create_agent
+from my_ai_team.tools.filesystem import READ_TOOLS, WRITE_TOOLS
 
 
 def pain(
@@ -57,7 +58,7 @@ def pain(
             "Delegate — don't do the work yourself.\n"
             + extra_instructions
         ),
-        tools=tools,
+        tools=tools if tools is not None else READ_TOOLS,
     )
 
 
@@ -88,7 +89,7 @@ def kisame(
             "Output changes with clear file paths and explanations.\n"
             + extra_instructions
         ),
-        tools=tools,
+        tools=tools if tools is not None else WRITE_TOOLS,
     )
 
 
@@ -125,7 +126,7 @@ def tobi(
             "- Skip error handling for network requests\n"
             + extra_instructions
         ),
-        tools=tools,
+        tools=tools if tools is not None else WRITE_TOOLS,
     )
 
 
@@ -155,7 +156,7 @@ def sasori(
             "Test behavior, not implementation details.\n"
             + extra_instructions
         ),
-        tools=tools,
+        tools=tools if tools is not None else WRITE_TOOLS,
     )
 
 
@@ -193,7 +194,7 @@ def itachi(
             "## Approved: Yes/No\n"
             + extra_instructions
         ),
-        tools=tools,
+        tools=tools if tools is not None else READ_TOOLS,
     )
 
 
@@ -242,7 +243,7 @@ def hidan(
             "## Passed: Yes/No\n"
             + extra_instructions
         ),
-        tools=tools,
+        tools=tools if tools is not None else READ_TOOLS,
         model=model,
     )
 
@@ -281,7 +282,7 @@ def deidara(
             "[How to confirm it's fixed]\n"
             + extra_instructions
         ),
-        tools=tools,
+        tools=tools if tools is not None else WRITE_TOOLS,
     )
 
 
@@ -314,7 +315,7 @@ def konan(
             "- Required for API consumers\n"
             + extra_instructions
         ),
-        tools=tools,
+        tools=tools if tools is not None else WRITE_TOOLS,
     )
 
 
@@ -347,5 +348,5 @@ def kakuzu(
             "- Test deployments in staging before production\n"
             + extra_instructions
         ),
-        tools=tools,
+        tools=tools if tools is not None else WRITE_TOOLS,
     )
