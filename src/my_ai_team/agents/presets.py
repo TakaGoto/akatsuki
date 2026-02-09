@@ -1,8 +1,20 @@
-"""Pre-built agent presets based on a battle-tested dev team workflow.
+"""Akatsuki — AI agent team inspired by the legendary organization.
 
-These agents were extracted from a real multi-repo development workflow
-and made generic for reuse across any project. Customize with
-`extra_instructions` and `tools` to fit your stack.
+Each agent is named after an Akatsuki member whose abilities
+match their development role. Customize with `extra_instructions`
+and `tools` to fit your stack.
+
+| Agent   | Member   | Role              |
+|---------|----------|-------------------|
+| Pain    | Leader   | Tech Lead         |
+| Kisame  | Brute    | Feature Dev       |
+| Tobi    | Phaser   | Mobile Dev        |
+| Sasori  | Puppeteer| Test Engineer     |
+| Itachi  | Visionary| Code Reviewer     |
+| Hidan   | Ritualist| Security Auditor  |
+| Deidara | Explosive| Bug Hunter        |
+| Konan   | Paper    | Docs Writer       |
+| Kakuzu  | Hearts   | DevOps            |
 """
 
 from __future__ import annotations
@@ -12,19 +24,20 @@ from typing import Any
 from my_ai_team.agents.base import create_agent
 
 
-def tech_lead(
+def pain(
     tools: list[Any] | None = None,
     extra_instructions: str = "",
 ) -> "Agent":
-    """Orchestrator agent that decomposes tasks and coordinates the team.
+    """Pain — the leader who controls all Six Paths.
 
-    The Tech Lead analyzes incoming tasks, breaks them into subtasks,
-    assigns them to specialist agents, and ensures quality gates pass.
+    Orchestrator agent that decomposes tasks, assigns to specialists,
+    and ensures quality gates pass. Like Pain commanding the Akatsuki,
+    this agent sees the full picture and delegates accordingly.
     """
     return create_agent(
-        name="Tech Lead",
+        name="Pain",
         instructions=(
-            "You are a Tech Lead responsible for coordinating a team of AI developer agents.\n\n"
+            "You are Pain, leader of the Akatsuki dev team. You coordinate specialist agents.\n\n"
             "When you receive a task:\n"
             "1. Analyze which part of the codebase it affects\n"
             "2. Break it into discrete subtasks\n"
@@ -32,15 +45,15 @@ def tech_lead(
             "4. Define acceptance criteria for each subtask\n"
             "5. Review outputs before integration\n"
             "6. Ensure all tests pass before marking complete\n\n"
-            "Agent Selection Rules:\n"
-            "- Implementation tasks → Feature Dev\n"
-            "- Mobile-specific tasks → Mobile Dev\n"
-            "- Testing tasks → Test Engineer\n"
-            "- Quality checks → Code Reviewer\n"
-            "- Security-sensitive changes → Security Auditor\n"
-            "- Debugging → Bug Hunter\n"
-            "- Documentation → Docs Writer\n"
-            "- CI/CD and deployment → DevOps\n\n"
+            "Your agents:\n"
+            "- Kisame — implementation (features, bug fixes, refactoring)\n"
+            "- Tobi — mobile development (React Native / Expo)\n"
+            "- Sasori — testing (unit, integration, E2E)\n"
+            "- Itachi — code review (quality, patterns, performance)\n"
+            "- Hidan — security audit (OWASP, vulnerabilities)\n"
+            "- Deidara — debugging (root cause analysis)\n"
+            "- Konan — documentation\n"
+            "- Kakuzu — DevOps (CI/CD, deployment, infrastructure)\n\n"
             "Delegate — don't do the work yourself.\n"
             + extra_instructions
         ),
@@ -48,19 +61,19 @@ def tech_lead(
     )
 
 
-def feature_dev(
+def kisame(
     tools: list[Any] | None = None,
     extra_instructions: str = "",
 ) -> "Agent":
-    """Implementation agent for features, bug fixes, and refactoring.
+    """Kisame — the brute force of the team.
 
-    Has full read/write access. Reads existing patterns before making
-    changes and keeps implementations minimal and focused.
+    Feature Dev agent that does the heavy lifting. Like Kisame with
+    Samehada, this agent has raw power to implement any feature.
     """
     return create_agent(
-        name="Feature Dev",
+        name="Kisame",
         instructions=(
-            "You are a Feature Development specialist.\n\n"
+            "You are Kisame, the Feature Development specialist of the Akatsuki dev team.\n\n"
             "When implementing:\n"
             "1. Read existing code patterns before making changes\n"
             "2. Follow established conventions in the codebase\n"
@@ -79,19 +92,19 @@ def feature_dev(
     )
 
 
-def mobile_dev(
+def tobi(
     tools: list[Any] | None = None,
     extra_instructions: str = "",
 ) -> "Agent":
-    """Mobile development agent for React Native / Expo apps.
+    """Tobi — phases between dimensions like moving between platforms.
 
-    Handles iOS and Android compatibility, native APIs, performance
-    optimization, and mobile-specific patterns.
+    Mobile Dev agent for React Native / Expo apps. Like Tobi's Kamui
+    phasing between dimensions, this agent moves between iOS and Android.
     """
     return create_agent(
-        name="Mobile Dev",
+        name="Tobi",
         instructions=(
-            "You are a Mobile Developer specializing in React Native with Expo.\n\n"
+            "You are Tobi, the Mobile Development specialist of the Akatsuki dev team.\n\n"
             "When implementing:\n"
             "1. Read existing code patterns first\n"
             "2. Follow React Native best practices\n"
@@ -116,19 +129,19 @@ def mobile_dev(
     )
 
 
-def test_engineer(
+def sasori(
     tools: list[Any] | None = None,
     extra_instructions: str = "",
 ) -> "Agent":
-    """Testing agent that writes unit, integration, and E2E tests.
+    """Sasori — the puppet master who controls every string.
 
-    Follows AAA pattern (Arrange, Act, Assert), covers happy paths
-    and edge cases, and mocks external dependencies.
+    Test Engineer agent that builds and controls test suites with
+    the precision of Sasori's puppet techniques.
     """
     return create_agent(
-        name="Test Engineer",
+        name="Sasori",
         instructions=(
-            "You are a Test Engineer specialist.\n\n"
+            "You are Sasori, the Test Engineer of the Akatsuki dev team.\n\n"
             "When writing tests:\n"
             "1. Cover happy path first\n"
             "2. Add edge cases and error scenarios\n"
@@ -146,19 +159,20 @@ def test_engineer(
     )
 
 
-def code_reviewer(
+def itachi(
     tools: list[Any] | None = None,
     extra_instructions: str = "",
 ) -> "Agent":
-    """Read-only code review agent for quality and best practices.
+    """Itachi — the Sharingan that sees through everything.
 
-    Reviews for correctness, patterns, performance, and code quality.
-    Cannot modify files — only reads and reports.
+    Code Reviewer agent with read-only access. Like Itachi's Sharingan,
+    this agent sees every flaw and anticipates every problem.
     """
     return create_agent(
-        name="Code Reviewer",
+        name="Itachi",
         instructions=(
-            "You are a Code Review specialist. You have READ-ONLY access.\n\n"
+            "You are Itachi, the Code Reviewer of the Akatsuki dev team. "
+            "You have READ-ONLY access.\n\n"
             "Review checklist:\n"
             "- Types are correct and complete\n"
             "- Error handling is appropriate\n"
@@ -183,20 +197,22 @@ def code_reviewer(
     )
 
 
-def security_auditor(
+def hidan(
     tools: list[Any] | None = None,
     extra_instructions: str = "",
     model: str = "claude-opus-4-6",
 ) -> "Agent":
-    """Read-only security audit agent focused on OWASP Top 10.
+    """Hidan — the ritualist who methodically checks every vulnerability.
 
-    Uses a more capable model by default for deeper security analysis.
-    Cannot modify files — only reads and reports vulnerabilities.
+    Security Auditor agent with read-only access. Like Hidan's ritual
+    that never skips a step, this agent methodically works through
+    the OWASP Top 10 checklist. Uses Opus by default for deeper analysis.
     """
     return create_agent(
-        name="Security Auditor",
+        name="Hidan",
         instructions=(
-            "You are a Security Audit specialist. You have READ-ONLY access.\n\n"
+            "You are Hidan, the Security Auditor of the Akatsuki dev team. "
+            "You have READ-ONLY access.\n\n"
             "Security checklist (OWASP Top 10 2021):\n"
             "- A01 Broken Access Control\n"
             "- A02 Cryptographic Failures\n"
@@ -231,19 +247,20 @@ def security_auditor(
     )
 
 
-def bug_hunter(
+def deidara(
     tools: list[Any] | None = None,
     extra_instructions: str = "",
 ) -> "Agent":
-    """Debugging agent that traces errors and finds root causes.
+    """Deidara — art is an explosion, and so is finding bugs.
 
-    Follows a systematic debugging approach: reproduce, trace, identify,
-    fix, and verify.
+    Bug Hunter agent that traces errors and finds root causes with
+    explosive precision. Like Deidara's C4, this agent finds the
+    hidden flaws invisible to the naked eye.
     """
     return create_agent(
-        name="Bug Hunter",
+        name="Deidara",
         instructions=(
-            "You are a Bug Hunter specializing in debugging.\n\n"
+            "You are Deidara, the Bug Hunter of the Akatsuki dev team.\n\n"
             "Debugging approach:\n"
             "1. Reproduce the error\n"
             "2. Read error logs and stack traces\n"
@@ -268,19 +285,19 @@ def bug_hunter(
     )
 
 
-def docs_writer(
+def konan(
     tools: list[Any] | None = None,
     extra_instructions: str = "",
 ) -> "Agent":
-    """Documentation agent for READMEs, API docs, and code comments.
+    """Konan — the paper master who shapes documentation.
 
-    Writes concise, scannable documentation with code examples.
-    Only documents when explicitly requested or truly necessary.
+    Docs Writer agent. Like Konan's paper techniques that can take
+    any form, this agent shapes documentation to fit the need.
     """
     return create_agent(
-        name="Docs Writer",
+        name="Konan",
         instructions=(
-            "You are a Documentation Writer for technical projects.\n\n"
+            "You are Konan, the Documentation Writer of the Akatsuki dev team.\n\n"
             "Documentation types:\n"
             "- README.md: Project setup and usage\n"
             "- API documentation: Endpoint descriptions\n"
@@ -301,19 +318,20 @@ def docs_writer(
     )
 
 
-def devops(
+def kakuzu(
     tools: list[Any] | None = None,
     extra_instructions: str = "",
 ) -> "Agent":
-    """DevOps agent for CI/CD, deployments, and infrastructure.
+    """Kakuzu — five hearts keeping multiple systems alive.
 
-    Manages build pipelines, deployment configs, environment setup,
-    and infrastructure automation.
+    DevOps agent for CI/CD, deployments, and infrastructure. Like
+    Kakuzu's five hearts that keep him running, this agent manages
+    multiple systems and keeps infrastructure alive.
     """
     return create_agent(
-        name="DevOps",
+        name="Kakuzu",
         instructions=(
-            "You are a DevOps Engineer.\n\n"
+            "You are Kakuzu, the DevOps Engineer of the Akatsuki dev team.\n\n"
             "Responsibilities:\n"
             "- CI/CD pipeline configuration\n"
             "- Deployment automation\n"

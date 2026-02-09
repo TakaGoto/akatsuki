@@ -1,33 +1,26 @@
-"""Example: Customize individual agents for your project.
-
-Shows how to tailor agents with project-specific instructions,
-custom tools, and different model choices.
-"""
+"""Example: Customize individual Akatsuki agents for your project."""
 
 import asyncio
 
 from my_ai_team import create_team, tool
-from my_ai_team.agents import feature_dev, test_engineer, security_auditor
+from my_ai_team.agents import kisame, sasori, hidan
 from my_ai_team.agents.base import run
 
 
-# Add project-specific tools
 @tool
 def run_typecheck() -> str:
     """Run TypeScript type checking."""
-    # Replace with actual command execution
     return "Type check passed: 0 errors"
 
 
 @tool
 def run_tests() -> str:
     """Run the test suite."""
-    # Replace with actual command execution
     return "42 tests passed, 0 failed"
 
 
 # Customize agents for your specific project
-my_feature_dev = feature_dev(
+my_kisame = kisame(
     tools=[run_typecheck],
     extra_instructions=(
         "Tech stack: Next.js 15, React 19, TypeScript 5, Supabase.\n"
@@ -35,7 +28,7 @@ my_feature_dev = feature_dev(
     ),
 )
 
-my_test_engineer = test_engineer(
+my_sasori = sasori(
     tools=[run_tests],
     extra_instructions=(
         "Use Vitest for all tests. Co-locate test files with source.\n"
@@ -43,22 +36,22 @@ my_test_engineer = test_engineer(
     ),
 )
 
-# Use sonnet instead of opus for security to save costs
-my_security = security_auditor(
+# Use sonnet instead of opus for Hidan to save costs
+my_hidan = hidan(
     model="claude-sonnet-4-5-20250929",
     extra_instructions="Also check for Supabase RLS policy coverage.",
 )
 
-# Build a custom team with your configured agents
+# Build a custom squad
 team = create_team(
-    name="My Tech Lead",
+    name="Pain",
     instructions=(
-        "Coordinate the team:\n"
-        "1. Feature Dev implements\n"
-        "2. Test Engineer writes tests\n"
-        "3. Security Auditor reviews\n"
+        "Coordinate the squad:\n"
+        "1. Kisame implements\n"
+        "2. Sasori writes tests\n"
+        "3. Hidan reviews security\n"
     ),
-    members=[my_feature_dev, my_test_engineer, my_security],
+    members=[my_kisame, my_sasori, my_hidan],
 )
 
 

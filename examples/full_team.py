@@ -1,4 +1,4 @@
-"""Example: Use the full 8-agent team for complex tasks."""
+"""Example: The full Akatsuki — all 8 agents under Pain."""
 
 import asyncio
 
@@ -6,7 +6,6 @@ from my_ai_team import full_team
 from my_ai_team.agents.base import run
 
 
-# The full team includes all specialists
 team = full_team(
     extra_instructions=(
         "This is a monorepo with web apps (Next.js), mobile apps (React Native/Expo), "

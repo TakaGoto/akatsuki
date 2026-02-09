@@ -1,7 +1,6 @@
-"""Example: Use the standard 4-agent dev team workflow.
+"""Example: The core Akatsuki dev squad.
 
-This is the core workflow from punk_records:
-  Feature Dev → Test Engineer → Code Reviewer → Security Auditor
+Pain coordinates: Kisame (implement) -> Sasori (test) -> Itachi (review) -> Hidan (security)
 """
 
 import asyncio
@@ -10,7 +9,6 @@ from my_ai_team import dev_team
 from my_ai_team.agents.base import run
 
 
-# Create a dev team customized for your project
 team = dev_team(
     extra_instructions=(
         "Tech stack: Next.js 15, React 19, TypeScript, Supabase.\n"

@@ -1,12 +1,12 @@
-"""CLI for running your AI agent team from any directory.
+"""CLI for running the Akatsuki agent team from any directory.
 
 Usage:
-    myteam "implement the signup form"
-    myteam --agent feature-dev "add input validation"
-    myteam --agent security-auditor "review this codebase"
-    myteam --team dev "fix the login bug"
-    myteam --team full "add price alerts with tests and docs"
-    myteam --list
+    akatsuki "implement the signup form"
+    akatsuki --agent kisame "add input validation"
+    akatsuki --agent hidan "review this codebase for vulnerabilities"
+    akatsuki --team dev "fix the login bug"
+    akatsuki --team full "add price alerts with tests and docs"
+    akatsuki --list
 """
 
 from __future__ import annotations
@@ -21,15 +21,15 @@ from my_ai_team.agents.teams import dev_team, full_team
 
 
 AGENTS = {
-    "tech-lead": presets.tech_lead,
-    "feature-dev": presets.feature_dev,
-    "mobile-dev": presets.mobile_dev,
-    "test-engineer": presets.test_engineer,
-    "code-reviewer": presets.code_reviewer,
-    "security-auditor": presets.security_auditor,
-    "bug-hunter": presets.bug_hunter,
-    "docs-writer": presets.docs_writer,
-    "devops": presets.devops,
+    "pain": presets.pain,
+    "kisame": presets.kisame,
+    "tobi": presets.tobi,
+    "sasori": presets.sasori,
+    "itachi": presets.itachi,
+    "hidan": presets.hidan,
+    "deidara": presets.deidara,
+    "konan": presets.konan,
+    "kakuzu": presets.kakuzu,
 }
 
 TEAMS = {
@@ -37,11 +37,30 @@ TEAMS = {
     "full": full_team,
 }
 
+ROSTER = """
+Akatsuki Dev Team
+═══════════════════════════════════════
+  Pain      Leader / Orchestrator
+  Kisame    Feature Dev (implementation)
+  Tobi      Mobile Dev (React Native)
+  Sasori    Test Engineer (testing)
+  Itachi    Code Reviewer (read-only)
+  Hidan     Security Auditor (read-only)
+  Deidara   Bug Hunter (debugging)
+  Konan     Docs Writer (documentation)
+  Kakuzu    DevOps (CI/CD, infra)
+
+Teams
+═══════════════════════════════════════
+  dev       Kisame + Sasori + Itachi + Hidan
+  full      All 8 agents under Pain
+""".strip()
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="myteam",
-        description="Run your AI agent team from the terminal.",
+        prog="akatsuki",
+        description="Run the Akatsuki AI agent team from the terminal.",
     )
     parser.add_argument(
         "task",
@@ -73,25 +92,12 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def list_agents() -> None:
-    print("Agents:")
-    for name, factory in AGENTS.items():
-        agent = factory()
-        print(f"  {name:20s} {agent.name}")
-
-    print("\nTeams:")
-    for name, factory in TEAMS.items():
-        team = factory()
-        members = ", ".join(h.name for h in team.handoffs)
-        print(f"  {name:20s} {team.name} -> [{members}]")
-
-
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
     if args.list_agents:
-        list_agents()
+        print(ROSTER)
         return
 
     if not args.task:

@@ -1,4 +1,4 @@
-"""My AI Team — reusable AI agent patterns built on the Anthropic Agent SDK."""
+"""Akatsuki — reusable AI agent team built on the Anthropic Agent SDK."""
 
 from my_ai_team.agents.base import create_agent, create_team
 from my_ai_team.agents.teams import dev_team, full_team
