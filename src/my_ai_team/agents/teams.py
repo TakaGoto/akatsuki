@@ -103,11 +103,11 @@ def dev_pipeline(
     itachi_tools: list | None = None,
     hidan_tools: list | None = None,
 ) -> Pipeline:
-    """Parallel dev pipeline: Kisame first, then Sasori + Itachi + Hidan
-    all run at the same time.
+    """Parallel dev pipeline with fix stage.
 
     Stage 1: Kisame implements
     Stage 2: Sasori (test) + Itachi (review) + Hidan (security) in parallel
+    Stage 3: Kisame fixes issues found in review
     """
     return Pipeline(
         context=extra_instructions,
@@ -124,6 +124,11 @@ def dev_pipeline(
                     presets.hidan(tools=hidan_tools),
                 ],
             ),
+            Stage(
+                label="Fix",
+                agents=[presets.kisame(tools=kisame_tools)],
+                fix=True,
+            ),
         ],
     )
 
@@ -131,12 +136,12 @@ def dev_pipeline(
 def full_pipeline(
     extra_instructions: str = "",
 ) -> Pipeline:
-    """Parallel full pipeline: Kisame first, then all reviewers in parallel,
-    then Konan for docs.
+    """Parallel full pipeline with fix stage.
 
     Stage 1: Kisame implements
     Stage 2: Sasori + Itachi + Hidan + Deidara in parallel
-    Stage 3: Konan writes docs
+    Stage 3: Kisame fixes issues found in review
+    Stage 4: Konan writes docs
     """
     return Pipeline(
         context=extra_instructions,
@@ -153,6 +158,11 @@ def full_pipeline(
                     presets.hidan(),
                     presets.deidara(),
                 ],
+            ),
+            Stage(
+                label="Fix",
+                agents=[presets.kisame()],
+                fix=True,
             ),
             Stage(
                 label="Documentation",

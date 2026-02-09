@@ -114,7 +114,8 @@ def build_custom_squad(names: list[str], config: dict, cli_context: str = "") ->
 def build_custom_pipeline(names: list[str], config: dict, cli_context: str = "") -> Pipeline:
     """Build a pipeline from a list of agent names.
 
-    First agent runs solo in stage 1, remaining agents run in parallel in stage 2.
+    First agent runs solo in stage 1, remaining agents run in parallel in stage 2,
+    then first agent runs again in a fix stage to address findings.
     """
     agents = [build_agent_with_overrides(name, config, cli_context) for name in names]
 
@@ -125,6 +126,9 @@ def build_custom_pipeline(names: list[str], config: dict, cli_context: str = "")
     if len(agents) == 1:
         return Pipeline(context=context, stages=[Stage(agents=agents)])
 
+    # Build a fresh copy of the first agent for the fix stage
+    fix_agent = build_agent_with_overrides(names[0], config, cli_context)
+
     return Pipeline(
         context=context,
         stages=[
@@ -132,6 +136,11 @@ def build_custom_pipeline(names: list[str], config: dict, cli_context: str = "")
             Stage(
                 label="Parallel",
                 agents=agents[1:],
+            ),
+            Stage(
+                label="Fix",
+                agents=[fix_agent],
+                fix=True,
             ),
         ],
     )
