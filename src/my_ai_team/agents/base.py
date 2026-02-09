@@ -131,8 +131,9 @@ def create_team(
 ) -> Agent:
     """Create a lead agent that orchestrates a team via handoffs.
 
-    The lead agent can delegate work to any member agent. Members can
-    hand back to the lead when their subtask is done.
+    The lead agent can delegate work to any member agent. Members
+    hand back to the lead when their subtask is done, so the lead
+    can then delegate to the next specialist.
 
     Args:
         name: Display name for the lead/orchestrator agent.
@@ -140,12 +141,23 @@ def create_team(
         members: List of agents the lead can hand off to.
         model: Model ID for the lead agent.
     """
-    return Agent(
+    leader = Agent(
         name=name,
         instructions=instructions,
         handoffs=members,
         model=model,
     )
+
+    # Give each member a handoff back to the leader so control returns
+    for member in members:
+        member.handoffs = list(member.handoffs) + [leader]
+        if "hand back to" not in member.instructions.lower():
+            member.instructions += (
+                f"\n\nWhen you have completed your work, hand back to {name} "
+                "so the next specialist can be assigned."
+            )
+
+    return leader
 
 
 async def run(agent: Agent, message: str) -> tuple[str, TokenUsage]:
