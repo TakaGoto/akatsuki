@@ -19,7 +19,7 @@ Reusable AI agent team built on the [Anthropic Agent SDK](https://github.com/ant
 ## Install
 
 ```bash
-pip install -e ~/my-ai-team
+pip install -e ~/akatsuki
 ```
 
 ## CLI — use from any directory
@@ -32,16 +32,70 @@ akatsuki "add input validation to the signup form"
 akatsuki --agent kisame "refactor the auth module"
 akatsuki --agent hidan "review this codebase for vulnerabilities"
 akatsuki --agent deidara "the login page crashes on empty email"
-akatsuki --agent itachi "review the latest changes"
+
+# Mix and match a custom squad
+akatsuki --agents kisame,itachi "quick implementation with review"
+akatsuki --agents kisame,sasori,hidan "build with tests and security"
+akatsuki --agents tobi,sasori,itachi "mobile feature with tests and review"
 
 # Deploy the full squad
 akatsuki --team full "add price alerts with tests and docs"
 
-# Pass project context
-akatsuki --context "Stack: Next.js, Supabase, TypeScript" "add a search endpoint"
+# Pass extra context
+akatsuki --context "Use Zod for validation" "add input validation"
 
 # See the roster
 akatsuki --list
+
+# Check loaded project config
+akatsuki --config
+```
+
+## Project config — `.akatsuki.yaml`
+
+Drop an `.akatsuki.yaml` in any project root. The CLI auto-detects it (walks up from cwd) and applies it to every command — no flags needed.
+
+```yaml
+# .akatsuki.yaml
+team: dev
+context: |
+  Monorepo with pnpm workspaces and Turborepo.
+  Stack: Next.js 15, React 19, TypeScript 5, Supabase.
+  Mobile apps use React Native / Expo SDK 54.
+
+agents:
+  hidan:
+    model: claude-sonnet-4-5-20250929   # save costs
+    extra: "Check Supabase RLS policies."
+  kisame:
+    extra: "Run pnpm check-types after changes."
+  tobi:
+    extra: "Apps: loki, ace. Use Zustand + AsyncStorage."
+```
+
+Then just:
+```bash
+cd ~/my-project
+akatsuki "add user authentication"
+# Picks up team, context, and agent overrides automatically
+```
+
+### Config fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `team` | `dev` or `full` | Default team when no `--team`/`--agent`/`--agents` flag is used |
+| `context` | string | Project context injected into every agent's instructions |
+| `agents` | map | Per-agent overrides |
+| `agents.<name>.extra` | string | Additional instructions for that agent |
+| `agents.<name>.model` | string | Override the model for that agent |
+
+### Config priority
+
+CLI flags always win over `.akatsuki.yaml`:
+```
+--agent/--agents/--team  >  .akatsuki.yaml team  >  default (dev)
+--context                +  .akatsuki.yaml context  (combined, not replaced)
 ```
 
 ## Python API
@@ -53,9 +107,7 @@ import asyncio
 from my_ai_team import dev_team
 from my_ai_team.agents.base import run
 
-# Pain coordinates: Kisame -> Sasori -> Itachi -> Hidan
 team = dev_team(extra_instructions="Stack: Next.js, TypeScript, Supabase.")
-
 asyncio.run(run(team, "Add input validation to the /api/users endpoint."))
 ```
 

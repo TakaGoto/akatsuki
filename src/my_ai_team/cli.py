@@ -3,10 +3,10 @@
 Usage:
     akatsuki "implement the signup form"
     akatsuki --agent kisame "add input validation"
-    akatsuki --agent hidan "review this codebase for vulnerabilities"
-    akatsuki --team dev "fix the login bug"
+    akatsuki --agents kisame,itachi,hidan "add auth with review"
     akatsuki --team full "add price alerts with tests and docs"
     akatsuki --list
+    akatsuki --config
 """
 
 from __future__ import annotations
@@ -15,9 +15,10 @@ import argparse
 import asyncio
 import sys
 
-from my_ai_team.agents.base import run
+from my_ai_team.agents.base import create_team, run
 from my_ai_team.agents import presets
 from my_ai_team.agents.teams import dev_team, full_team
+from my_ai_team.config import load_config, get_agent_overrides
 
 
 AGENTS = {
@@ -57,6 +58,45 @@ Teams
 """.strip()
 
 
+def build_agent_with_overrides(name: str, config: dict, cli_context: str = "") -> "Agent":
+    """Build a single agent, applying .akatsuki.yaml overrides + CLI context."""
+    factory = AGENTS[name]
+    overrides = get_agent_overrides(config, name)
+
+    extra = config.get("context", "")
+    if overrides.get("extra"):
+        extra += "\n" + overrides["extra"]
+    if cli_context:
+        extra += "\n" + cli_context
+
+    kwargs = {"extra_instructions": extra}
+    if overrides.get("model"):
+        kwargs["model"] = overrides["model"]
+
+    return factory(**kwargs)
+
+
+def build_custom_squad(names: list[str], config: dict, cli_context: str = "") -> "Agent":
+    """Build a Pain-led team from a list of agent names."""
+    members = [build_agent_with_overrides(name, config, cli_context) for name in names]
+    member_list = ", ".join(f"**{m.name}**" for m in members)
+
+    context = config.get("context", "")
+    if cli_context:
+        context += "\n" + cli_context
+
+    return create_team(
+        name="Pain",
+        instructions=(
+            f"You are Pain, leader of a custom Akatsuki squad: {member_list}.\n\n"
+            "Delegate tasks to the right specialist. "
+            "Only mark complete when all agents have finished.\n\n"
+            + context
+        ),
+        members=members,
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="akatsuki",
@@ -73,21 +113,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run a single agent.",
     )
     parser.add_argument(
+        "--agents",
+        help="Comma-separated list of agents for a custom squad (e.g. kisame,itachi,hidan).",
+    )
+    parser.add_argument(
         "--team",
         choices=list(TEAMS.keys()),
-        default="dev",
-        help="Which team to use (default: dev).",
+        help="Which pre-built team to use.",
     )
     parser.add_argument(
         "--context",
         default="",
-        help="Extra project context to pass to the agent/team.",
+        help="Extra project context (added on top of .akatsuki.yaml context).",
     )
     parser.add_argument(
         "--list",
         action="store_true",
         dest="list_agents",
         help="List all available agents and teams.",
+    )
+    parser.add_argument(
+        "--config",
+        action="store_true",
+        dest="show_config",
+        help="Show the loaded .akatsuki.yaml config for the current directory.",
     )
     return parser
 
@@ -100,16 +149,45 @@ def main() -> None:
         print(ROSTER)
         return
 
+    config = load_config()
+
+    if args.show_config:
+        from my_ai_team.config import find_config
+        config_path = find_config()
+        if config_path:
+            print(f"Config: {config_path}\n")
+            print(f"Team:    {config['team']}")
+            print(f"Context: {config['context'][:100]}{'...' if len(config['context']) > 100 else ''}")
+            if config["agents"]:
+                print("Agent overrides:")
+                for name, overrides in config["agents"].items():
+                    print(f"  {name}: {overrides}")
+        else:
+            print("No .akatsuki.yaml found in current directory or parents.")
+        return
+
     if not args.task:
         parser.print_help()
         sys.exit(1)
 
+    # Priority: --agent > --agents > --team > config team > default (dev)
     if args.agent:
-        factory = AGENTS[args.agent]
-        agent = factory(extra_instructions=args.context)
+        agent = build_agent_with_overrides(args.agent, config, args.context)
+    elif args.agents:
+        names = [n.strip() for n in args.agents.split(",")]
+        invalid = [n for n in names if n not in AGENTS]
+        if invalid:
+            print(f"Unknown agents: {', '.join(invalid)}")
+            print(f"Available: {', '.join(AGENTS.keys())}")
+            sys.exit(1)
+        agent = build_custom_squad(names, config, args.context)
     else:
-        factory = TEAMS[args.team]
-        agent = factory(extra_instructions=args.context)
+        team_name = args.team or config.get("team", "dev")
+        factory = TEAMS[team_name]
+        context = config.get("context", "")
+        if args.context:
+            context += "\n" + args.context
+        agent = factory(extra_instructions=context)
 
     result = asyncio.run(run(agent, args.task))
     print(result)
