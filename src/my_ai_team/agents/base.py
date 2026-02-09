@@ -15,6 +15,7 @@ litellm.modify_params = True
 set_tracing_disabled(True)
 
 ANTHROPIC_PROVIDER = RunConfig(model_provider=LitellmProvider())
+MAX_TURNS = 50
 
 
 @dataclass
@@ -118,7 +119,7 @@ def create_team(
 
 async def run(agent: Agent, message: str) -> tuple[str, TokenUsage]:
     """Run an agent with a user message and return (output, usage)."""
-    result = await Runner.run(agent, message, run_config=ANTHROPIC_PROVIDER)
+    result = await Runner.run(agent, message, run_config=ANTHROPIC_PROVIDER, max_turns=MAX_TURNS)
     usage = TokenUsage()
     sdk_usage = result.context_wrapper.usage
     usage.add(
