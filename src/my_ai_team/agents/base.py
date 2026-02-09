@@ -22,24 +22,35 @@ MAX_TURNS = 50
 
 
 class ProgressHooks(RunHooks):
-    """Prints live progress to stderr so users see what agents are doing."""
+    """Prints human-readable progress to stderr."""
+
+    def __init__(self):
+        self._phase: dict[str, str] = {}
+
+    def _set_phase(self, agent_name: str, phase: str) -> None:
+        prev = self._phase.get(agent_name)
+        if prev != phase:
+            self._phase[agent_name] = phase
+            _log(f"  [{agent_name}] {phase}")
 
     async def on_agent_start(self, context, agent):
         _log(f"[{agent.name}] starting...")
 
     async def on_tool_start(self, context, agent, tool):
-        _log(f"  [{agent.name}] {tool.name}()")
-
-    async def on_tool_end(self, context, agent, tool, result):
-        preview = (result or "")[:80].replace("\n", " ").strip()
-        if preview:
-            _log(f"  [{agent.name}] {tool.name} -> {preview}")
+        name = tool.name
+        if name in ("list_directory", "read_file"):
+            self._set_phase(agent.name, "Reading codebase...")
+        elif name == "write_file":
+            self._set_phase(agent.name, "Writing changes...")
+        elif name == "run_command":
+            self._set_phase(agent.name, "Running commands...")
 
     async def on_handoff(self, context, from_agent, to_agent):
-        _log(f"[{from_agent.name}] -> [{to_agent.name}]")
+        _log(f"[{from_agent.name}] Handing off to {to_agent.name}")
 
     async def on_agent_end(self, context, agent, output):
-        _log(f"[{agent.name}] done")
+        self._phase.pop(agent.name, None)
+        _log(f"[{agent.name}] Done")
 
 
 def _log(msg: str) -> None:
